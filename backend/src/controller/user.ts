@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { prisma } from "../../utils/prisma";
-import { log } from "console";
 import bcrypt from "bcrypt";
 
 export const createUser = async (req: Request, res: Response) => {
@@ -23,7 +22,7 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
-export const getUser = async (res: Response) => {
+export const getUser = async (req: any, res: any) => {
   try {
     const response = await prisma.user.findMany();
     return res.send({
@@ -31,7 +30,7 @@ export const getUser = async (res: Response) => {
       data: response,
     });
   } catch (error) {
-    return res.send(error);
+    return res.status(400).send({ success: false });
   }
 };
 
@@ -50,7 +49,7 @@ export const updataUserById = async (req: Request, res: Response) => {
       data: response,
     });
   } catch (error) {
-    return res.send(error);
+    return res.send({ message: error });
   }
 };
 
@@ -66,6 +65,6 @@ export const deleteUserById = async (req: Request, res: Response) => {
       message: "user deleted",
     });
   } catch (error) {
-    return res.send(error);
+    return res.send({ message: error });
   }
 };
