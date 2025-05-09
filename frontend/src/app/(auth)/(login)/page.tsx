@@ -13,7 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { CircleX } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email"),
