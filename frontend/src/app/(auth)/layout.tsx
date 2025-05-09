@@ -25,20 +25,25 @@ export default function RootLayout({
 }>) {
   return (
     <div className="flex w-screen gap-5 h-screen bg-white">
-      <div className="flex flex-col w-1/2 bg-[#FBBF24] justify-center items-center">
-        <div className="flex gap-2">
-          <Coffee />
-          Buy Me Coffee
-        </div>
-        <Image src="/logo.png" width={240} height={240} alt="logoImg" />
-        <div className=" flex flex-col justify-center items-center gap-3 pt-[40px] text-black">
-          <p className="font-[700] text-[24px]"> Fund your creative work</p>
-          <p className="text-[16px]">
-            Accept support. Start a membership. Setup a shop. It’s easier than
-            you think.
-          </p>
+      <div className="flex flex-col w-1/2 items-center bg-[#FBBF24]">
+        <div className="flex flex-col size-fit pt-[192px] gap-[238px]">
+          <div className="flex gap-2 text-[16px] font-[700]">
+            <Coffee className="stroke-2" />
+            Buy Me Coffee
+          </div>
+          <div className="flex w-full flex-col justify-center items-center">
+            <Image src="/logo.png" width={240} height={240} alt="logoImg" />
+            <div className=" flex flex-col justify-center items-center gap-3 pt-[40px] text-black">
+              <p className="font-[700] text-[24px]"> Fund your creative work</p>
+              <p className="text-[16px]">
+                Accept support. Start a membership. Setup a shop. It’s easier
+                than you think.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
+
       {children}
     </div>
   );
