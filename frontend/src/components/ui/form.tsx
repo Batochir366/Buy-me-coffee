@@ -140,7 +140,7 @@ function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
 function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   const { error, formMessageId } = useFormField();
   const body = error ? (
-    <div className="flex justify-center items-center gap-2">
+    <div className="flex justify-center items-center gap-2 text-nowrap">
       <CircleX className="size-[14px] text-red-400 stroke-1" />
       {String(error?.message ?? "")}
     </div>
