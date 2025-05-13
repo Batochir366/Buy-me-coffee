@@ -1,16 +1,27 @@
 import { prisma } from "../../../utils/prisma";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
+import { Prisma } from "../../../generated/prisma";
 
-export const checkUser = async (res: Response, req: Request) => {
-  const { name } = req.body;
+export type UserWhereUniqueInput = {
+  name: string;
+};
+
+export const checkUser = async (req: Request, res: Response) => {
+  const { username } = req.body;
+
   try {
-    const user = await prisma.user.findUnique({ where: { name: name } });
+    const user = await prisma.user.findUnique({
+      where: { name: username },
+    });
     if (user) {
-      return res.send({ message: "username already taken" });
+      return res.status(200).send({ message: "Username already exists" });
     }
+    return res.status(200).send({ message: "Username is available" });
   } catch (error) {
-    return res.send({ message: error });
+    console.log(error);
+
+    return res.status(500).send({ message: "Server error" });
   }
 };
 

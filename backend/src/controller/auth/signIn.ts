@@ -6,20 +6,25 @@ import { secret_key } from "../../../utils/env";
 
 export const signIn = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-
   try {
-    const user = await prisma.user.findUnique({ where: { email: email } });
-
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
     if (!user) return res.send({ message: "User not found" });
     const isMatch = compareSync(password, user.password);
     if (!isMatch) return res.send({ message: "Email or Password wrong" });
+    const token = jwt.sign(user, secret_key as any, { expiresIn: 36000 });
+    return res
+      .cookie("token", token, {
+        maxAge: 100000,
+        signed: false,
 
-    const token = jwt.sign(user, secret_key as any, { expiresIn: 3600 });
-    return res.cookie("token", token, {
-      maxAge: 60 * 1000 * 10,
-      secure: false,
-    });
+        httpOnly: true,
+        secure: false,
+      })
+      .send();
   } catch (error) {
-    return res.send({ message: error });
+    console.log(error, "this is error");
+    return res.status(500).send({ message: error });
   }
 };

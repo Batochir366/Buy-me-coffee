@@ -18,7 +18,7 @@ export const createUser = async (req: Request, res: Response) => {
       data: Response,
     });
   } catch (error) {
-    return res.send(error);
+    return res.send({ message: error });
   }
 };
 
@@ -36,7 +36,6 @@ export const getUser = async (req: any, res: any) => {
 
 export const updataUserById = async (req: Request, res: Response) => {
   const { id } = req.params;
-  console.log(id, "id");
 
   const { email, name, password } = req.body;
   try {

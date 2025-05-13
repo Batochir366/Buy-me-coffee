@@ -13,13 +13,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import axios from "axios";
+import { port } from "../../../../../utils/env";
 
 const formSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.any(),
+  email: z.string().email("Please enter a valid email, example@gmail.com"),
+  password: z.string().min(8, "password must be atleast 8 characters"),
 });
 
-export const Step2 = () => {
+export const Step2 = ({ username }: { username: string }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -28,22 +30,28 @@ export const Step2 = () => {
     },
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-  }
+  const createUser = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const response = await axios.post(`${port}/user`, {
+        ...values,
+        name: username,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error, "err");
+    }
+  };
+
   return (
     <div>
       <div className="text-[24px] font-semibold p-6">
-        Welcome,{"name"}
+        Welcome,{username}
         <p className="text-[#71717A] text-[14px] font-light">
           Connect email and set a password
         </p>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(createUser)}>
           <div className="flex flex-col gap-3 pb-6 px-6 w-[355px]">
             <FormField
               control={form.control}
@@ -65,7 +73,11 @@ export const Step2 = () => {
                 <FormItem className="flex items-start flex-col">
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter password here" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Enter password here"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

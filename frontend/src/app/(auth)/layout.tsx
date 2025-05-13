@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <div className="flex w-screen gap-5 h-screen bg-white">
       <div className="flex flex-col w-1/2 items-center bg-[#FBBF24]">
-        <div className="flex flex-col size-fit pt-[192px] gap-[238px]">
+        <div className="flex flex-col size-fit pt-[100px] gap-[300px]">
           <div className="flex gap-2 text-[16px] font-[700]">
             <Coffee className="stroke-2" />
             Buy Me Coffee
@@ -43,7 +43,6 @@ export default function RootLayout({
           </div>
         </div>
       </div>
-
       {children}
     </div>
   );
