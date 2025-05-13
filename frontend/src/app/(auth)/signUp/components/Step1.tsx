@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { port } from "../../../../../utils/env";
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { CircleCheck, CircleX } from "lucide-react";
 
 const formSchema = z.object({
@@ -53,12 +53,17 @@ export const Step1 = ({
         setTimeout(() => {
           setUsername(values.username);
           setStep(false);
-        }, 1000);
+        }, 1500);
       }
     } catch (error) {
       console.error(error, "err");
     }
   };
+
+  const handlerInput = () => {
+    setReqError("");
+  };
+
   return (
     <div>
       <div className="text-[24px] font-semibold p-6">
@@ -76,7 +81,7 @@ export const Step1 = ({
               render={({ field }) => (
                 <FormItem className="flex items-start flex-col">
                   <FormLabel>Username</FormLabel>
-                  <FormControl>
+                  <FormControl onChangeCapture={handlerInput}>
                     <Input placeholder="Enter username here" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-400" />

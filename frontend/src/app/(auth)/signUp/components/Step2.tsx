@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { port } from "../../../../../utils/env";
+import { Eye, EyeClosed } from "lucide-react";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email, example@gmail.com"),
@@ -22,6 +24,10 @@ const formSchema = z.object({
 });
 
 export const Step2 = ({ username }: { username: string }) => {
+  const [isShow, setIsShow] = useState(false);
+  const handleIsShow = () => {
+    setIsShow(!isShow);
+  };
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,8 +80,12 @@ export const Step2 = ({ username }: { username: string }) => {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <Input
-                      type="password"
-                      placeholder="Enter password here"
+                      className={` focus-visible:ring-0 ${
+                        field.value.length >= 8 &&
+                        "focus-visible:border-[#18BA51] border-solid border-2"
+                      }`}
+                      type={`${!isShow ? "password" : "text"}`}
+                      placeholder="password must be atleast 8 characters"
                       {...field}
                     />
                   </FormControl>
@@ -83,6 +93,18 @@ export const Step2 = ({ username }: { username: string }) => {
                 </FormItem>
               )}
             />
+            {isShow ? (
+              <Eye
+                onClick={handleIsShow}
+                className="text-gray-400 size-4 cursor-pointer"
+              />
+            ) : (
+              <EyeClosed
+                onClick={handleIsShow}
+                className="text-gray-400 size-4 cursor-pointer"
+              />
+            )}
+
             <Button type="submit">Continue</Button>
           </div>
         </form>
