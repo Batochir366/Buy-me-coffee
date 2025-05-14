@@ -26,11 +26,7 @@ export default function RootLayout({
   return (
     <div className="flex w-screen gap-5 h-screen bg-white">
       <div className="flex flex-col w-1/2 items-center bg-[#FBBF24]">
-        <div className="flex flex-col size-fit pt-[100px] gap-[300px]">
-          <div className="flex gap-2 text-[16px] font-[700]">
-            <Coffee className="stroke-2" />
-            Buy Me Coffee
-          </div>
+        <div className="flex flex-col size-fit pt-[400px]">
           <div className="flex w-full flex-col justify-center items-center">
             <Image src="/logo.png" width={240} height={240} alt="logoImg" />
             <div className=" flex flex-col justify-center items-center gap-3 pt-[40px] text-black">

@@ -36,7 +36,7 @@ export const signUp = async (req: Request, res: Response) => {
         email,
       },
     });
-    console.log(res);
+
     return res.send({
       data: Response,
     });
