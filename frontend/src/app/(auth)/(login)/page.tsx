@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CircleX } from "lucide-react";
 
 const formSchema = z.object({

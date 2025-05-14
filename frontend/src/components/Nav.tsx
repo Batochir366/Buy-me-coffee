@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Coffee } from "lucide-react";
-import { usePathname } from "next/navigation";
 import React from "react";
 
 export const Nav = () => {

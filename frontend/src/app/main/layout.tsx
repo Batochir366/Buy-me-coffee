@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Nav } from "@/components/Nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,6 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <div className="flex w-screen gap-5 h-screen bg-white">
+      <Nav />
       <div className="flex pt-[100px] gap-[100px]">
         <Tabs defaultValue="Home" className="size-fit">
           <TabsList className="flex flex-col gap-1">
