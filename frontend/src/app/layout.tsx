@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { Nav } from "./components/Nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -10,6 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata: Metadata = {
+  title: "Buy me coffee",
+  description: "Buy me coffee 4th project",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -20,7 +28,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="flex flex-col w-screen h-screen bg-white">
+          <Nav />
+          {children}
+        </div>
       </body>
     </html>
   );
