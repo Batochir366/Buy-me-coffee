@@ -15,7 +15,7 @@ export const checkUser = async (req: Request, res: Response) => {
       where: { name: username },
     });
     if (user) {
-      return res.status(200).send({ message: "Username already exists" });
+      return res.status(409).send({ message: "Username already exists" });
     }
     return res.status(200).send({ message: "Username is available" });
   } catch (error) {
@@ -29,6 +29,12 @@ export const signUp = async (req: Request, res: Response) => {
   const { email, name, password } = req.body;
   const hashedPass = await bcrypt.hash(password, 5);
   try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (user) {
+      return res.status(409).send({ message: "User already exists" });
+    }
     const Response = await prisma.user.create({
       data: {
         name,
@@ -36,7 +42,6 @@ export const signUp = async (req: Request, res: Response) => {
         email,
       },
     });
-
     return res.send({
       data: Response,
     });

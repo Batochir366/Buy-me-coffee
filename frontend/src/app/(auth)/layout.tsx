@@ -1,12 +1,17 @@
+"use client";
+
 import { Nav } from "@/components/Nav";
+import { AuthContext } from "@/context/AuthContext";
 
 import Image from "next/image";
+import { useState } from "react";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [userName, setUserName] = useState("");
   return (
     <div className="flex w-screen gap-5 h-screen bg-white">
       <Nav />
@@ -24,7 +29,9 @@ export default function RootLayout({
           </div>
         </div>
       </div>
-      {children}
+      <AuthContext.Provider value={{ userName, setUserName }}>
+        {children}
+      </AuthContext.Provider>
     </div>
   );
 }

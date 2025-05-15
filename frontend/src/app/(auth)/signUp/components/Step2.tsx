@@ -15,16 +15,19 @@ import {
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { port } from "../../../../../utils/env";
-import { Eye, EyeClosed } from "lucide-react";
-import { useState } from "react";
+import { CircleX, Eye, EyeClosed } from "lucide-react";
+import { useContext, useState } from "react";
+import { AuthContext } from "@/context/AuthContext";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email, example@gmail.com"),
   password: z.string().min(8, "password must be atleast 8 characters"),
 });
 
-export const Step2 = ({ username }: { username: string }) => {
+export const Step2 = () => {
+  const { userName } = useContext(AuthContext);
   const [isShow, setIsShow] = useState(false);
+  const [reqError, setReqError] = useState("");
   const handleIsShow = () => {
     setIsShow(!isShow);
   };
@@ -40,18 +43,24 @@ export const Step2 = ({ username }: { username: string }) => {
     try {
       const response = await axios.post(`${port}/user`, {
         ...values,
-        name: username,
+        name: userName,
       });
+      if (response.data.message == "User already exists") {
+        setReqError(response.data.message);
+      }
       console.log(response);
     } catch (error) {
       console.log(error, "err");
     }
   };
+  const handlerInput = () => {
+    setReqError("");
+  };
 
   return (
     <div>
       <div className="text-[24px] font-semibold p-6">
-        Welcome,{username}
+        Welcome,{userName}
         <p className="text-[#71717A] text-[14px] font-light">
           Connect email and set a password
         </p>
@@ -65,9 +74,15 @@ export const Step2 = ({ username }: { username: string }) => {
               render={({ field }) => (
                 <FormItem className="flex items-start flex-col">
                   <FormLabel>Email</FormLabel>
-                  <FormControl>
+                  <FormControl onChangeCapture={handlerInput}>
                     <Input placeholder="Enter email here" {...field} />
                   </FormControl>
+                  {reqError && (
+                    <div className="flex justify-center items-center gap-2">
+                      <CircleX className="size-[14px] text-red-400 stroke-1" />
+                      <p className="text-[14px] text-red-400">{reqError}</p>
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

@@ -243,7 +243,6 @@ export const Step2 = () => {
                       </FormItem>
                     )}
                   />
-
                   <div className="w-full flex gap-3">
                     <FormField
                       control={form.control}

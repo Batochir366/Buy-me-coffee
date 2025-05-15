@@ -15,54 +15,49 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { port } from "../../../../../utils/env";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { CircleCheck, CircleX } from "lucide-react";
-
-const formSchema = z.object({
-  username: z.string().min(2, "choose atleast 2 characters"),
-});
-
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { CircleCheck } from "lucide-react";
+import { AuthContext } from "@/context/AuthContext";
 export const Step1 = ({
   setStep,
-  setUsername,
 }: {
   setStep: Dispatch<SetStateAction<boolean>>;
-  setUsername: Dispatch<SetStateAction<string>>;
 }) => {
-  const [reqError, setReqError] = useState("");
-  const [reqAvailable, setReqAvailable] = useState("");
+  const { setUserName } = useContext(AuthContext);
+
+  const checkEmailExists = async (username: string) => {
+    try {
+      const response = await axios.post(`${port}/auth/check`, { username });
+      if (response.status === 200) setUserName(username);
+      return true;
+
+      return false;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  const formSchema = z.object({
+    username: z
+      .string()
+      .min(2, "choose atleast 2 characters")
+      .refine(checkEmailExists, {
+        message: "Username already exists",
+      }),
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
     },
   });
-
-  const checkEmailExists = async (values: z.infer<typeof formSchema>) => {
-    console.log(values.username);
-    try {
-      const response = await axios.post(`${port}/auth/check`, values);
-      setReqError("");
-      setReqAvailable("");
-      setUsername("");
-      if (response.data.message == "Username already exists") {
-        setReqError(response.data.message);
-      }
-      if (response.data.message == "Username is available") {
-        setReqAvailable(response.data.message);
-        setTimeout(() => {
-          setUsername(values.username);
-          setStep(false);
-        }, 1500);
-      }
-    } catch (error) {
-      console.error(error, "err");
-    }
-  };
-
-  const handlerInput = () => {
-    setReqError("");
-  };
 
   return (
     <div>
@@ -73,7 +68,7 @@ export const Step1 = ({
         </p>
       </div>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(checkEmailExists)}>
+        <form onSubmit={form.handleSubmit(() => setStep(false))}>
           <div className="flex flex-col gap-3 pb-6 px-6 w-[355px]">
             <FormField
               control={form.control}
@@ -81,21 +76,15 @@ export const Step1 = ({
               render={({ field }) => (
                 <FormItem className="flex items-start flex-col">
                   <FormLabel>Username</FormLabel>
-                  <FormControl onChangeCapture={handlerInput}>
+                  <FormControl>
                     <Input placeholder="Enter username here" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-400" />
-                  {reqError && (
-                    <div className="flex justify-center items-center gap-2">
-                      <CircleX className="size-[14px] text-red-400 stroke-1" />
-                      <p className="text-[14px] text-red-400">{reqError}</p>
-                    </div>
-                  )}
-                  {reqAvailable && (
+                  {form.formState.isValid && (
                     <div className="flex justify-center items-center gap-2">
                       <CircleCheck className="size-[14px] text-[#18BA51] stroke-1" />
                       <p className="text-[14px]  text-[#18BA51]">
-                        {reqAvailable}
+                        Username is available
                       </p>
                     </div>
                   )}

@@ -6,15 +6,11 @@ import { useState } from "react";
 
 export default function page() {
   const [step, setStep] = useState(true);
-  const [username, setUsername] = useState("");
+
   return (
     <div className="w-1/2 h-screen flex justify-center">
       <div className="flex flex-col size-fit pt-[400px]">
-        {step ? (
-          <Step1 setStep={setStep} setUsername={setUsername} />
-        ) : (
-          <Step2 username={username} />
-        )}
+        {step ? <Step1 setStep={setStep} /> : <Step2 />}
       </div>
     </div>
   );
