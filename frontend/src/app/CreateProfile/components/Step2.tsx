@@ -15,20 +15,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { uploadImage } from "../../../../utils/Image";
-import Image from "next/image";
-import { Check, ChevronsUpDown, CircleX } from "lucide-react";
+import { Check, ChevronsUpDown } from "lucide-react";
 
 import axios from "axios";
 import { port } from "../../../../utils/env";
 import { useRouter } from "next/navigation";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Command,
   CommandEmpty,
@@ -42,31 +33,31 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSeparator,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { isValidLuhn } from "@/components/LuhnAlgorithm";
 
 const formSchema = z.object({
-  firstname: z
+  firstName: z
     .string()
     .min(1, "Please enter name")
     .min(2, "name must be 2 characters")
     .max(16, "name must be in 16 characters"),
-  lastname: z
+  lastName: z
     .string()
     .min(1, "Please enter name")
     .min(2, "name must be 2 characters")
     .max(16, "name must be in 16 characters"),
   country: z.string().min(1, "Select country to continue"),
-  cart: z.string(),
+  cardNumber: z
+    .string()
+    .max(16, "Invalid card number")
+    .min(16, "Invalid card number")
+    .refine(isValidLuhn, { message: "invalid cart number" }),
+  expiryDate: z.string().min(1, "Invalid month"),
+  cvc: z.string().min(3, "Invalid month").max(3, "Invalid month"),
 });
 export const Step2 = () => {
   const router = useRouter();
   const [countryNames, setCountryNames] = useState<string[]>([]);
-  const [image, setImage] = useState<string | File>("");
   const [isLoading, setIsLoading] = useState(false);
 
   const getCountryNames = async () => {
@@ -90,13 +81,15 @@ export const Step2 = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       country: "",
-      lastname: "",
-      firstname: "",
-      cart: "",
+      lastName: "",
+      firstName: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvc: "",
     },
   });
 
-  const createProfil = async (values: z.infer<typeof formSchema>) => {
+  const createProfile = async (values: z.infer<typeof formSchema>) => {
     console.log(values, "sdfs");
   };
 
@@ -119,7 +112,7 @@ export const Step2 = () => {
             <Form {...form}>
               <form
                 className="flex text-right"
-                onSubmit={form.handleSubmit(createProfil)}
+                onSubmit={form.handleSubmit(createProfile)}
               >
                 <div className="flex flex-col text-right gap-3 pb-6 w-[510px]">
                   <FormField
@@ -188,14 +181,14 @@ export const Step2 = () => {
                   <div className="flex w-full gap-3">
                     <FormField
                       control={form.control}
-                      name="firstname"
+                      name="firstName"
                       render={({ field }) => (
                         <FormItem className="flex  w-full items-start flex-col">
                           <FormLabel>First name</FormLabel>
                           <FormControl>
                             <Input
                               className={` focus-visible:ring-0  ${
-                                field.value.length >= 5 &&
+                                field.value.length >= 2 &&
                                 "focus-visible:border-[#18BA51] border-solid border-2"
                               }`}
                               placeholder="Enter your name here"
@@ -208,14 +201,14 @@ export const Step2 = () => {
                     />
                     <FormField
                       control={form.control}
-                      name="lastname"
+                      name="lastName"
                       render={({ field }) => (
                         <FormItem className="flex w-full items-start flex-col">
                           <FormLabel>Last name</FormLabel>
                           <FormControl className="flex">
                             <Input
                               className={` focus-visible:ring-0 ${
-                                field.value.length >= 6 &&
+                                field.value.length >= 2 &&
                                 "focus-visible:border-[#18BA51] border-solid border-2"
                               }`}
                               type="text"
@@ -230,39 +223,72 @@ export const Step2 = () => {
                   </div>
                   <FormField
                     control={form.control}
-                    name="cart"
+                    name="cardNumber"
                     render={({ field }) => (
-                      <FormItem className="flex items-start flex-col">
-                        <FormLabel>Enter cart number</FormLabel>
+                      <FormItem className="flex w-full items-start flex-col">
+                        <FormLabel>Enter card number</FormLabel>
                         <FormControl className="flex">
-                          <InputOTP placeholder="X" maxLength={16} {...field}>
-                            <InputOTPGroup>
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                              <InputOTPSlot index={3} />
-                              <InputOTPSeparator />
-                              <InputOTPSlot index={4} />
-                              <InputOTPSlot index={5} />
-                              <InputOTPSlot index={6} />
-                              <InputOTPSlot index={7} />
-                              <InputOTPSeparator />
-                              <InputOTPSlot index={8} />
-                              <InputOTPSlot index={9} />
-                              <InputOTPSlot index={10} />
-                              <InputOTPSlot index={11} />
-                              <InputOTPSeparator />
-                              <InputOTPSlot index={12} />
-                              <InputOTPSlot index={13} />
-                              <InputOTPSlot index={14} />
-                              <InputOTPSlot index={15} />
-                            </InputOTPGroup>
-                          </InputOTP>
+                          <Input
+                            maxLength={16}
+                            className={` focus-visible:ring-0 ${
+                              field.value.length >= 16 &&
+                              "focus-visible:border-[#18BA51] border-solid border-2 "
+                            }`}
+                            type="text"
+                            placeholder="XXXX-XXXX-XXXX-XXXX"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <div className="w-full flex gap-3">
+                    <FormField
+                      control={form.control}
+                      name="expiryDate"
+                      render={({ field }) => (
+                        <FormItem className="flex w-full items-start flex-col">
+                          <FormLabel>expiryDate</FormLabel>
+                          <FormControl className="flex">
+                            <Input
+                              className={` focus-visible:ring-0 ${
+                                field.value.length >= 6 &&
+                                "focus-visible:border-[#18BA51] border-solid border-2"
+                              }`}
+                              type="month"
+                              placeholder="month / year"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="cvc"
+                      render={({ field }) => (
+                        <FormItem className="flex w-full items-start flex-col">
+                          <FormLabel>CVC</FormLabel>
+                          <FormControl className="flex">
+                            <Input
+                              maxLength={3}
+                              className={` focus-visible:ring-0 ${
+                                field.value.length >= 3 &&
+                                "focus-visible:border-[#18BA51] border-solid border-2"
+                              }`}
+                              type="text"
+                              placeholder="CVC"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <Button type="submit">Continue</Button>
                 </div>
               </form>

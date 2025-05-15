@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -34,7 +34,11 @@ const formSchema = z.object({
     .max(160, "too long"),
   social: z.string().min(1, "Please enter name").url("please enter valid url"),
 });
-export const Step1 = () => {
+export const Step1 = ({
+  setStep,
+}: {
+  setStep: Dispatch<SetStateAction<boolean>>;
+}) => {
   const router = useRouter();
   const [review, setReview] = useState<string>();
   const [image, setImage] = useState<string | File>("");
@@ -62,7 +66,7 @@ export const Step1 = () => {
         //   ...values,
         //   avatarImage: imageURL,
         // });
-        router.push("/");
+        setStep(false);
         console.log(imageURL, "url");
       }
     } catch (error) {
