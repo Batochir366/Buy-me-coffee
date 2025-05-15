@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CircleX } from "lucide-react";
 
 const formSchema = z.object({
@@ -52,13 +52,7 @@ export default function page() {
 
   return (
     <div className="w-1/2 h-screen flex justify-center">
-      <div className="flex flex-col size-fit pt-[100px] gap-[300px]">
-        <div className="flex justify-between">
-          <div></div>
-          <Button className="bg-[#F4F4F5] text-black hover:bg-black/20">
-            Sign up
-          </Button>
-        </div>
+      <div className="flex flex-col size-fit pt-[400px]">
         <div>
           <div className="text-[24px] font-semibold p-6">Welcome back</div>
           <Form {...form}>

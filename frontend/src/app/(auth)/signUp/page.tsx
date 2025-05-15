@@ -9,13 +9,7 @@ export default function page() {
   const [username, setUsername] = useState("");
   return (
     <div className="w-1/2 h-screen flex justify-center">
-      <div className="flex flex-col size-fit pt-[100px] gap-[238px]">
-        <div className="flex justify-between">
-          <div></div>
-          <Button className="bg-[#F4F4F5] text-black hover:bg-black/20">
-            Log in
-          </Button>
-        </div>
+      <div className="flex flex-col size-fit pt-[400px]">
         {step ? (
           <Step1 setStep={setStep} setUsername={setUsername} />
         ) : (
