@@ -1,4 +1,4 @@
-import { createContext, Dispatch, SetStateAction } from "react";
+import { createContext } from "react";
 
 type UserContextType = {
   setUserName: React.Dispatch<React.SetStateAction<string>>;

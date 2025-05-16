@@ -36,7 +36,6 @@ export const Step1 = ({
       const response = await axios.post(`${port}/auth/check`, { username });
       if (response.status === 200) setUserName(username);
       return true;
-
       return false;
     } catch (error) {
       return false;

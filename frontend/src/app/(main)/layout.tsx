@@ -28,15 +28,24 @@ export default function RootLayout({
   return (
     <div className="flex w-screen gap-5 h-screen bg-white">
       <Nav />
-      <div className="flex pt-[100px] gap-[100px]">
-        <Tabs defaultValue="Home" className="size-fit">
-          <TabsList className="flex flex-col gap-1">
-            <TabsTrigger value="Home">Home</TabsTrigger>
-            <TabsTrigger value="Explore">Explore</TabsTrigger>
-            <TabsTrigger className="flex justify-center gap-2" value="page">
+      <div className="flex pt-[100px] px-[80px] gap-[100px]">
+        <Tabs defaultValue="Home" className="size-fit bg-white">
+          <TabsList className="flex h-fit w-[250px] bg-white  flex-col gap-2">
+            <TabsTrigger className="w-full" value="Home">
+              Home
+            </TabsTrigger>
+            <TabsTrigger className="w-full" value="Explore">
+              Explore
+            </TabsTrigger>
+            <TabsTrigger
+              className="flex w-full items-center gap-2"
+              value="page"
+            >
               View page <ExternalLink />
             </TabsTrigger>
-            <TabsTrigger value="Account">Account settings</TabsTrigger>
+            <TabsTrigger className="w-full" value="Account">
+              Account settings
+            </TabsTrigger>
           </TabsList>
         </Tabs>
         {children}

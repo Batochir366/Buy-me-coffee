@@ -18,6 +18,7 @@ import { port } from "../../../../../utils/env";
 import { CircleX, Eye, EyeClosed } from "lucide-react";
 import { useContext, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email, example@gmail.com"),
@@ -25,9 +26,11 @@ const formSchema = z.object({
 });
 
 export const Step2 = () => {
+  const router = useRouter();
   const { userName } = useContext(AuthContext);
   const [isShow, setIsShow] = useState(false);
   const [reqError, setReqError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const handleIsShow = () => {
     setIsShow(!isShow);
   };
@@ -41,14 +44,20 @@ export const Step2 = () => {
 
   const createUser = async (values: z.infer<typeof formSchema>) => {
     try {
-      const response = await axios.post(`${port}/user`, {
-        ...values,
-        name: userName,
-      });
+      setIsLoading(true);
+      const response = await axios.post(
+        `${port}/auth/signUp`,
+        {
+          ...values,
+          name: userName,
+        },
+        { withCredentials: true }
+      );
       if (response.data.message == "User already exists") {
-        setReqError(response.data.message);
+        setIsLoading(false);
+        return setReqError(response.data.message);
       }
-      console.log(response);
+      router.push("/CreateProfile");
     } catch (error) {
       console.log(error, "err");
     }
@@ -59,71 +68,80 @@ export const Step2 = () => {
 
   return (
     <div>
-      <div className="text-[24px] font-semibold p-6">
-        Welcome,{userName}
-        <p className="text-[#71717A] text-[14px] font-light">
-          Connect email and set a password
-        </p>
-      </div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(createUser)}>
-          <div className="flex flex-col gap-3 pb-6 px-6 w-[355px]">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="flex items-start flex-col">
-                  <FormLabel>Email</FormLabel>
-                  <FormControl onChangeCapture={handlerInput}>
-                    <Input placeholder="Enter email here" {...field} />
-                  </FormControl>
-                  {reqError && (
-                    <div className="flex justify-center items-center gap-2">
-                      <CircleX className="size-[14px] text-red-400 stroke-1" />
-                      <p className="text-[14px] text-red-400">{reqError}</p>
-                    </div>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem className="flex items-start flex-col">
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input
-                      className={` focus-visible:ring-0 ${
-                        field.value.length >= 8 &&
-                        "focus-visible:border-[#18BA51] border-solid border-2"
-                      }`}
-                      type={`${!isShow ? "password" : "text"}`}
-                      placeholder="password must be atleast 8 characters"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {isShow ? (
-              <Eye
-                onClick={handleIsShow}
-                className="text-gray-400 size-4 cursor-pointer"
-              />
-            ) : (
-              <EyeClosed
-                onClick={handleIsShow}
-                className="text-gray-400 size-4 cursor-pointer"
-              />
-            )}
-
-            <Button type="submit">Continue</Button>
+      {isLoading ? (
+        <div className="flex flex-col justify-center items-center">
+          <img className="size-[150px]" src="/loading.gif" alt="loading" />
+          <p className=" text-[24px] font-medium animate-pulse">Loading</p>
+        </div>
+      ) : (
+        <>
+          <div className="text-[24px] font-semibold p-6">
+            Welcome,{userName}
+            <p className="text-[#71717A] text-[14px] font-light">
+              Connect email and set a password
+            </p>
           </div>
-        </form>
-      </Form>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(createUser)}>
+              <div className="flex flex-col gap-3 pb-6 px-6 w-[355px]">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start flex-col">
+                      <FormLabel>Email</FormLabel>
+                      <FormControl onChangeCapture={handlerInput}>
+                        <Input placeholder="Enter email here" {...field} />
+                      </FormControl>
+                      {reqError && (
+                        <div className="flex justify-center items-center gap-2">
+                          <CircleX className="size-[14px] text-red-400 stroke-1" />
+                          <p className="text-[14px] text-red-400">{reqError}</p>
+                        </div>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start flex-col">
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          className={` focus-visible:ring-0 ${
+                            field.value.length >= 8 &&
+                            "focus-visible:border-[#18BA51] border-solid border-2"
+                          }`}
+                          type={`${!isShow ? "password" : "text"}`}
+                          placeholder="password must be atleast 8 characters"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {isShow ? (
+                  <Eye
+                    onClick={handleIsShow}
+                    className="text-gray-400 size-4 cursor-pointer"
+                  />
+                ) : (
+                  <EyeClosed
+                    onClick={handleIsShow}
+                    className="text-gray-400 size-4 cursor-pointer"
+                  />
+                )}
+
+                <Button type="submit">Continue</Button>
+              </div>
+            </form>
+          </Form>
+        </>
+      )}
     </div>
   );
 };

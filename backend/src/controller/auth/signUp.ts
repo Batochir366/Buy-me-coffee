@@ -2,6 +2,8 @@ import { prisma } from "../../../utils/prisma";
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { Prisma } from "../../../generated/prisma";
+import jwt from "jsonwebtoken";
+import { secret_key } from "../../../utils/env";
 
 export type UserWhereUniqueInput = {
   name: string;
@@ -33,7 +35,7 @@ export const signUp = async (req: Request, res: Response) => {
       where: { email: email },
     });
     if (user) {
-      return res.status(409).send({ message: "User already exists" });
+      return res.status(200).send({ message: "User already exists" });
     }
     const Response = await prisma.user.create({
       data: {
@@ -42,9 +44,16 @@ export const signUp = async (req: Request, res: Response) => {
         email,
       },
     });
-    return res.send({
-      data: Response,
+
+    const token = jwt.sign(Response, secret_key as any, { expiresIn: 36000 });
+    res.cookie("token", token, {
+      maxAge: 100000,
+      signed: false,
+      httpOnly: true,
+      secure: false,
     });
+
+    return res.send({ message: "success", token: token });
   } catch (error) {
     return res.send({ message: error });
   }

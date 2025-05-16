@@ -17,16 +17,6 @@ app.use(cookieParser());
 app.use("/user", userRouter);
 app.use("/auth", authRouter);
 
-app.get("/", (_, res) => {
-  res
-    .cookie("test", "test", {
-      maxAge: 1000000,
-      httpOnly: true,
-      // signed: true,
-      secure: false,
-    })
-    .send();
-});
 app.listen(8080, () => {
   console.log(`server running at http://localhost:8080`);
 });
