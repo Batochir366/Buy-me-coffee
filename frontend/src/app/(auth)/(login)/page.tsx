@@ -49,7 +49,9 @@ export default function page() {
       console.log(error, "error");
     }
   };
-
+  const handlerInput = () => {
+    setReqError("");
+  };
   return (
     <div className="w-1/2 h-screen flex justify-center">
       <div className="flex flex-col size-fit pt-[400px]">
@@ -77,7 +79,7 @@ export default function page() {
                   render={({ field }) => (
                     <FormItem className="flex items-start flex-col">
                       <FormLabel>Password</FormLabel>
-                      <FormControl>
+                      <FormControl onChange={handlerInput}>
                         <Input
                           className={` focus-visible:ring-0 ${
                             field.value.length >= 8 &&
