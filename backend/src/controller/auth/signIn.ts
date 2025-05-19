@@ -14,15 +14,14 @@ export const signIn = async (req: Request, res: Response) => {
     const isMatch = compareSync(password, user.password);
     if (!isMatch) return res.send({ message: "Email or Password wrong" });
     const token = jwt.sign(user, secret_key as any, { expiresIn: 36000 });
-    return res
-      .cookie("token", token, {
-        maxAge: 100000,
-        signed: false,
+    res.cookie("token", token, {
+      maxAge: 100000,
+      signed: false,
+      httpOnly: true,
+      secure: false,
+    });
 
-        httpOnly: true,
-        secure: false,
-      })
-      .send();
+    return res.send({ message: "success", token: token });
   } catch (error) {
     console.log(error, "this is error");
     return res.status(500).send({ message: error });

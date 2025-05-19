@@ -66,7 +66,13 @@ export default function page() {
           </SelectContent>
         </Select>
       </div>
-      <div className=" flex flex-col h-fit w-full p-6 border border-solid border-[#E4E4E7] rounded-lg">
+      <div className=" max-h-[1000px] overflow-scroll flex flex-col gap-6 py-6">
+        <RecentTrans />
+        <RecentTrans />
+        <RecentTrans />
+        <RecentTrans />
+        <RecentTrans />
+        <RecentTrans />
         <RecentTrans />
       </div>
     </div>

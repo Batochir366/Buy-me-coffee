@@ -10,7 +10,7 @@ export const RecentTrans = () => {
     setShowMore(!showMore);
   };
   return (
-    <div>
+    <div className=" flex flex-col h-fit w-full p-6 border border-solid border-[#E4E4E7] rounded-lg">
       <div className="flex justify-between w-full h-fit items-center pb-4">
         <div className="flex items-center gap-3">
           <Image
@@ -33,7 +33,7 @@ export const RecentTrans = () => {
       {text.length >= 193 ? (
         <div className="text-[14px]">
           {showMore ? <p>{text}</p> : <p>{text.slice(0, 193)}... </p>}
-          <p onClick={HandShowMore} className=" underline">
+          <p onClick={HandShowMore} className="cursor-pointer underline">
             Show more
           </p>
         </div>
