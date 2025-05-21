@@ -11,6 +11,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+<<<<<<< HEAD
 model User {
   id    Int     @id @default(autoincrement())
   email String @unique
@@ -30,3 +31,6 @@ model Profile {
   successMessage String
   userId Int @unique
 }
+=======
+
+>>>>>>> 819270b (test)
