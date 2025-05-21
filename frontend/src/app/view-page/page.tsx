@@ -108,7 +108,7 @@ export default function page() {
                     render={({ field }) => (
                       <FormItem className="items-start flex flex-col">
                         <FormLabel>
-                          Enter a BuyMeCoffee or social acount URL:
+                          Enter BuyMeCoffee or social acount URL:
                         </FormLabel>
                         <FormControl>
                           <Input
