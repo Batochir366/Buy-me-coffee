@@ -34,10 +34,10 @@ export const Step1 = ({
   const checkEmailExists = async (username: string) => {
     try {
       const response = await axios.post(`${port}/auth/check`, { username });
-      if (response.status === 200) setUserName(username);
-      return true;
 
-      return false;
+      if (response.status === 200) setUserName(username);
+
+      return true;
     } catch (error) {
       return false;
     }
