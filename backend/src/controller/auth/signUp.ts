@@ -45,9 +45,9 @@ export const signUp = async (req: Request, res: Response) => {
       },
     });
 
-    const token = jwt.sign(Response, secret_key as any, { expiresIn: 36000 });
+    const token = jwt.sign(Response, secret_key as any, { expiresIn: 360000 });
     res.cookie("token", token, {
-      maxAge: 100000,
+      maxAge: 1000000,
       signed: false,
       httpOnly: true,
       secure: false,

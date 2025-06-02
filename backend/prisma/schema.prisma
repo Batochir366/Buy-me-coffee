@@ -12,49 +12,21 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  password String
-  name     String  @unique
-  profile  Profile?
-}
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-model User {
   id    Int     @id @default(autoincrement())
   email String @unique
   password String
   name  String @unique
   profile Profile?
-=======
+}
+
 model Profile {
   id Int @id @default(autoincrement())
   user User @relation(fields: [userId],references: [id],onDelete: Cascade)
-  name String
+  name String 
   about String
   avatarImage String
   socialMediaURL String
   backgroundImage String
   successMessage String
   userId Int @unique
->>>>>>> de66884 (test)
 }
-
-model Profile {
-  id              Int    @id @default(autoincrement())
-  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name            String
-  about           String
-  avatarImage     String
-  socialMediaURL  String
-  backgroundImage String
-  successMessage  String
-  userId          Int    @unique
-}
-<<<<<<< HEAD
-=======
-
->>>>>>> 819270b (test)
-=======
->>>>>>> 69cca35 (llr)

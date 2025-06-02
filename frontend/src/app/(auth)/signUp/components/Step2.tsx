@@ -44,7 +44,6 @@ export const Step2 = () => {
 
   const createUser = async (values: z.infer<typeof formSchema>) => {
     try {
-      setIsLoading(true);
       const response = await axios.post(
         `${port}/auth/signUp`,
         {
@@ -57,7 +56,7 @@ export const Step2 = () => {
         setIsLoading(false);
         return setReqError(response.data.message);
       }
-      router.push("/CreateProfile");
+      router.push("/create-profile");
     } catch (error) {
       console.log(error, "err");
     }

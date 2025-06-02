@@ -13,9 +13,9 @@ export const signIn = async (req: Request, res: Response) => {
     if (!user) return res.send({ message: "User not found" });
     const isMatch = compareSync(password, user.password);
     if (!isMatch) return res.send({ message: "Email or Password wrong" });
-    const token = jwt.sign(user, secret_key as any, { expiresIn: 36000 });
+    const token = jwt.sign(user, secret_key as any, { expiresIn: 360000 });
     res.cookie("token", token, {
-      maxAge: 100000,
+      maxAge: 1000000,
       signed: false,
       httpOnly: true,
       secure: false,

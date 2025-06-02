@@ -3,6 +3,7 @@ import cors from "cors";
 import { userRouter } from "./routes/user";
 import { authRouter } from "./routes/auth";
 import cookieParser from "cookie-parser";
+import { profileRouter } from "./routes/profile";
 const app = express();
 
 app.use(json());
@@ -16,7 +17,7 @@ app.use(cookieParser());
 
 app.use("/user", userRouter);
 app.use("/auth", authRouter);
-
+app.use("/profile", profileRouter);
 app.listen(8080, () => {
   console.log(`server running at http://localhost:8080`);
 });

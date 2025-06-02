@@ -5,7 +5,7 @@ import React from "react";
 
 export const Nav = () => {
   return (
-    <div className="flex absolute w-full py-4 px-[80px] justify-between">
+    <div className="flex absolute w-full py-4 px-[80px] justify-between z-30 bg-white">
       <div className="flex gap-2 text-[16px] font-[700]">
         <Coffee className="stroke-2" />
         Buy Me Coffee
