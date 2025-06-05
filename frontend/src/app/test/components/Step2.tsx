@@ -1,300 +1,141 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import { useState } from "react";
+import { Control } from "react-hook-form";
+import { FormField, FormItem, FormMessage } from "@/components/ui/form";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Check, ChevronsUpDown } from "lucide-react";
+type Category = {
+  id: number;
+  name: string;
+  icon: string;
+};
 
-import axios from "axios";
-import { port } from "../../../../utils/env";
-import { useRouter } from "next/navigation";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { isValidLuhn } from "@/components/LuhnAlgorithm";
+type Step2Props = {
+  control: Control<any>; // you can strongly type this if needed
+  name: string;
+};
 
-const formSchema = z.object({
-  firstName: z
-    .string()
-    .min(1, "Please enter name")
-    .min(2, "name must be 2 characters")
-    .max(16, "name must be in 16 characters"),
-  lastName: z
-    .string()
-    .min(1, "Please enter name")
-    .min(2, "name must be 2 characters")
-    .max(16, "name must be in 16 characters"),
-  country: z.string().min(1, "Select country to continue"),
-  cardNumber: z
-    .string()
-    .max(16, "Invalid card number")
-    .min(16, "Invalid card number")
-    .refine(isValidLuhn, { message: "invalid cart number" }),
-  expiryDate: z.string().min(1, "Invalid month"),
-  cvc: z.string().min(3, "Invalid month").max(3, "Invalid month"),
-});
-export const Step2 = () => {
-  const router = useRouter();
-  const [countryNames, setCountryNames] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+const categoryIconsData: Category[] = [
+  { id: 1, name: "Archery", icon: "🏹" },
+  { id: 3, name: "Badminton", icon: "🏸" },
+  { id: 4, name: "Baseball", icon: "⚾" },
+  { id: 5, name: "Basketball", icon: "🏀" },
+  { id: 6, name: "Boxing", icon: "🥊" },
+  { id: 9, name: "Cycling", icon: "🚴" },
+  { id: 13, name: "Football", icon: "⚽" },
+  { id: 14, name: "Golf", icon: "🏌️" },
+  { id: 15, name: "Gymnastics", icon: "🤸" },
+  { id: 18, name: "Ice Hockey", icon: "🏒" },
+  { id: 19, name: "Judo", icon: "🥋" },
+  { id: 20, name: "Karate", icon: "🥋" },
+  { id: 28, name: "Shooting", icon: "🔫" },
+  { id: 35, name: "Swimming pool", icon: "🏊" },
+  { id: 38, name: "Tennis", icon: "🎾" },
+  { id: 41, name: "Volleyball", icon: "🏐" },
+  { id: 44, name: "Wrestling", icon: "🤼" },
+  { id: 47, name: "Art & Craft", icon: "🎨" },
+  { id: 48, name: "Billiards", icon: "🎱" },
+  { id: 49, name: "Board Games", icon: "🎲" },
+  { id: 50, name: "Bowling", icon: "🎳" },
+  { id: 53, name: "Cooking Classes", icon: "👨‍🍳" },
+  { id: 54, name: "Dance", icon: "💃" },
+  { id: 56, name: "Fishing", icon: "🎣" },
+  { id: 58, name: "Hiking", icon: "🥾" },
+  { id: 61, name: "Karaoke", icon: "🎤" },
+  { id: 64, name: "Movie Night", icon: "🎬" },
+  { id: 70, name: "Roller Skating", icon: "🛼" },
+  { id: 82, name: "PC Video Games", icon: "🎮" },
+  { id: 86, name: "Zip Lining", icon: "🌲" },
+];
 
-  const getCountryNames = async () => {
-    try {
-      const res = await axios.get(
-        "https://restcountries.com/v3.1/all?fields=name"
-      );
-      const data = res.data;
-      const names = data.map((country: any) => country.name.common);
-      setCountryNames(names);
-    } catch (error) {
-      console.error("Failed to fetch countries", error);
-    }
-  };
-
-  useEffect(() => {
-    getCountryNames();
-  }, []);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      country: "",
-      lastName: "",
-      firstName: "",
-      cardNumber: "",
-      expiryDate: "",
-      cvc: "",
-    },
-  });
-
-  const createProfile = async (values: z.infer<typeof formSchema>) => {
-    console.log(values, "sdfs");
-  };
+export const Step2 = ({ control, name }: Step2Props) => {
+  const [search, setSearch] = useState("");
 
   return (
-    <div>
-      {isLoading ? (
-        <div className="flex flex-col justify-center items-center">
-          <img className="size-[150px]" src="/loading.gif" alt="loading" />
-          <p className=" text-[24px] font-medium animate-pulse">Loading</p>
-        </div>
-      ) : (
-        <div className="flex items-start flex-col">
-          <div className="text-[24px] font-semibold py-5">
-            How would you like to be paid?
-            <p className="text-[14px] font-normal text-[#71717A]">
-              Enter location and payment details
-            </p>
-          </div>
-          <div className="pt-8 flex">
-            <Form {...form}>
-              <form
-                className="flex text-right"
-                onSubmit={form.handleSubmit(createProfile)}
-              >
-                <div className="flex flex-col text-right gap-3 pb-6 w-[510px]">
-                  <FormField
-                    control={form.control}
-                    name="country"
-                    render={({ field }) => (
-                      <FormItem className="flex items-start flex-col">
-                        <FormLabel>Select country</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                className={cn(
-                                  "w-full justify-between",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value
-                                  ? countryNames.find(
-                                      (country) => country === field.value
-                                    )
-                                  : "Select country"}
-                                <ChevronsUpDown className="opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[200px] p-0">
-                            <Command>
-                              <CommandInput
-                                placeholder="Search country"
-                                className="h-9"
-                              />
-                              <CommandList>
-                                <CommandEmpty>No country found.</CommandEmpty>
-                                <CommandGroup>
-                                  {countryNames.map((country) => (
-                                    <CommandItem
-                                      value={country}
-                                      key={country}
-                                      onSelect={() => {
-                                        form.setValue("country", country);
-                                      }}
-                                    >
-                                      {country}
-                                      <Check
-                                        className={cn(
-                                          "ml-auto",
-                                          country === field.value
-                                            ? "opacity-100"
-                                            : "opacity-0"
-                                        )}
-                                      />
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex w-full gap-3">
-                    <FormField
-                      control={form.control}
-                      name="firstName"
-                      render={({ field }) => (
-                        <FormItem className="flex  w-full items-start flex-col">
-                          <FormLabel>First name</FormLabel>
-                          <FormControl>
-                            <Input
-                              className={` focus-visible:ring-0  ${
-                                field.value.length >= 2 &&
-                                "focus-visible:border-[#18BA51] border-solid border-2"
-                              }`}
-                              placeholder="Enter your name here"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="lastName"
-                      render={({ field }) => (
-                        <FormItem className="flex w-full items-start flex-col">
-                          <FormLabel>Last name</FormLabel>
-                          <FormControl className="flex">
-                            <Input
-                              className={` focus-visible:ring-0 ${
-                                field.value.length >= 2 &&
-                                "focus-visible:border-[#18BA51] border-solid border-2"
-                              }`}
-                              type="text"
-                              placeholder="Enter your name here"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="cardNumber"
-                    render={({ field }) => (
-                      <FormItem className="flex w-full items-start flex-col">
-                        <FormLabel>Enter card number</FormLabel>
-                        <FormControl className="flex">
-                          <Input
-                            maxLength={16}
-                            className={` focus-visible:ring-0 ${
-                              field.value.length >= 16 &&
-                              "focus-visible:border-[#18BA51] border-solid border-2 "
-                            }`}
-                            type="text"
-                            placeholder="XXXX-XXXX-XXXX-XXXX"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="w-full flex gap-3">
-                    <FormField
-                      control={form.control}
-                      name="expiryDate"
-                      render={({ field }) => (
-                        <FormItem className="flex w-full items-start flex-col">
-                          <FormLabel>expiryDate</FormLabel>
-                          <FormControl className="flex">
-                            <Input
-                              className={` focus-visible:ring-0 ${
-                                field.value.length >= 6 &&
-                                "focus-visible:border-[#18BA51] border-solid border-2"
-                              }`}
-                              type="month"
-                              placeholder="month / year"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="cvc"
-                      render={({ field }) => (
-                        <FormItem className="flex w-full items-start flex-col">
-                          <FormLabel>CVC</FormLabel>
-                          <FormControl className="flex">
-                            <Input
-                              maxLength={3}
-                              className={` focus-visible:ring-0 ${
-                                field.value.length >= 3 &&
-                                "focus-visible:border-[#18BA51] border-solid border-2"
-                              }`}
-                              type="text"
-                              placeholder="CVC"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <Button type="submit">Continue</Button>
+    <FormField
+      control={control}
+      name={name}
+      render={({ field }) => {
+        const selected = categoryIconsData.filter((c) =>
+          field.value?.includes(c.name)
+        );
+
+        const toggleSelect = (cat: Category) => {
+          const newValue = field.value?.includes(cat.name)
+            ? field.value.filter((name: string) => name !== cat.name)
+            : [...(field.value || []), cat.name];
+          field.onChange(newValue);
+        };
+
+        const remove = (name: string) => {
+          field.onChange(field.value.filter((n: string) => n !== name));
+        };
+
+        const filtered = categoryIconsData.filter((c) =>
+          c.name.toLowerCase().includes(search.toLowerCase())
+        );
+
+        return (
+          <FormItem>
+            {/* Pills */}
+            <div className="flex flex-wrap gap-2 mb-2 max-w-[500px]">
+              {selected.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full"
+                >
+                  <span className="mr-1">{cat.icon}</span>
+                  {cat.name}
+                  <button
+                    type="button"
+                    onClick={() => remove(cat.name)}
+                    className="ml-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-              </form>
-            </Form>
-          </div>
-        </div>
-      )}
-    </div>
+              ))}
+            </div>
+
+            {/* Search */}
+            <input
+              placeholder="Search categories..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border px-3 py-2 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+
+            {/* Grid */}
+            <div className="max-h-60 overflow-y-auto grid grid-cols-2 gap-2 mt-2">
+              {filtered.length > 0 ? (
+                filtered.map((cat) => {
+                  const isSelected = field.value?.includes(cat.name);
+                  return (
+                    <div
+                      key={cat.id}
+                      onClick={() => toggleSelect(cat)}
+                      className={`flex items-center gap-2 px-2 py-1 border rounded cursor-pointer transition hover:bg-blue-50 ${
+                        isSelected
+                          ? "bg-blue-100 border-blue-400"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <span className="text-lg">{cat.icon}</span>
+                      <span>{cat.name}</span>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-400 col-span-2 text-center">
+                  No categories found
+                </p>
+              )}
+            </div>
+            <div className="flex w-full items-start">
+              <FormMessage />
+            </div>
+          </FormItem>
+        );
+      }}
+    />
   );
 };

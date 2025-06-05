@@ -1,4 +1,5 @@
 "use client";
+import { Step2 } from "@/app/test/components/Step2";
 import { Button } from "@/components/ui/button";
 import { Coffee } from "lucide-react";
 import React from "react";
