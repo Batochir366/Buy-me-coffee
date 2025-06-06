@@ -265,7 +265,7 @@ export const Map = () => {
                       Complete your profile page
                     </DialogTitle>
                     <>
-                      {true ? (
+                      {isNext ? (
                         <div>
                           <Form {...Step2form}>
                             <form
