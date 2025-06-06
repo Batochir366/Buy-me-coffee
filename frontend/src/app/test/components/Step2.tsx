@@ -10,7 +10,7 @@ type Category = {
 };
 
 type Step2Props = {
-  control: Control<any>; // you can strongly type this if needed
+  control: Control<any>;
   name: string;
 };
 
@@ -76,7 +76,6 @@ export const Step2 = ({ control, name }: Step2Props) => {
 
         return (
           <FormItem>
-            {/* Pills */}
             <div className="flex flex-wrap gap-2 mb-2 max-w-[500px]">
               {selected.map((cat) => (
                 <div
@@ -96,15 +95,13 @@ export const Step2 = ({ control, name }: Step2Props) => {
               ))}
             </div>
 
-            {/* Search */}
             <input
               placeholder="Search categories..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border px-3 py-2 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full border px-3 py-2 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-[#e3e8ffe6]"
             />
 
-            {/* Grid */}
             <div className="max-h-60 overflow-y-auto grid grid-cols-2 gap-2 mt-2">
               {filtered.length > 0 ? (
                 filtered.map((cat) => {
@@ -113,14 +110,16 @@ export const Step2 = ({ control, name }: Step2Props) => {
                     <div
                       key={cat.id}
                       onClick={() => toggleSelect(cat)}
-                      className={`flex items-center gap-2 px-2 py-1 border rounded cursor-pointer transition hover:bg-blue-50 ${
+                      className={`flex items-center gap-2 px-2 py-1 border rounded cursor-pointer transition hover:bg-blue-50  ${
                         isSelected
                           ? "bg-blue-100 border-blue-400"
                           : "border-gray-200"
                       }`}
                     >
                       <span className="text-lg">{cat.icon}</span>
-                      <span>{cat.name}</span>
+                      <span className="text-[#e3e8ffe6]  hover:text-black">
+                        {cat.name}
+                      </span>
                     </div>
                   );
                 })

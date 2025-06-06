@@ -46,7 +46,10 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Step2 } from "./Step2";
 import { Step1 } from "./Step1";
-import { uploadToCloudinary } from "../utils/imageUpload";
+import {
+  uploadImageToCloudinary,
+  uploadToCloudinary,
+} from "../utils/imageUpload";
 
 const customIcon = L.icon({
   iconUrl:
@@ -70,10 +73,7 @@ const MarkerIcon = new L.DivIcon({
     <MapPin className=" hidden text-red-400" />
   ),
 });
-const MarkerPin = new L.DivIcon({
-  className: "custom-div-icon",
-  html: ReactDOMServer.renderToString(<MapPin className=" text-blue-700" />),
-});
+
 const initialData = [
   {
     latLng: [47.9222, 106.95] as LatLngTuple,
@@ -86,18 +86,23 @@ const initialData = [
     icon: customIcon2,
   },
 ];
+type CompanyInfoType = z.infer<typeof formSchema> &
+  z.infer<typeof step2formSchema>;
 
 export const Map = () => {
   const [clicked, setClicked] = useState<LatLngTuple | null>(null);
   const [address, setAddress] = useState("");
   const [data] = useState(initialData);
-  const [value, setValue] = useState<z.infer<typeof formSchema>>();
-  const [value2, setValue2] = useState<z.infer<typeof step2formSchema>>();
-  const [review, setReview] = useState<string[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [profile, setProfile] = useState<string | File>();
+  const [value, setValue] = useState<
+    Partial<z.infer<typeof formSchema>> &
+      Partial<z.infer<typeof step2formSchema>>
+  >({});
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedProfile, setSelectedProfile] = useState<File | undefined>();
   const [profileReview, setProfileReview] = useState<string>("");
+  const [imagesReview, setImagesReview] = useState<string[]>([]);
   const [isNext, setIsNext] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfoType>();
   const markerRef = useRef<LeafletMarker | null>(null);
 
   useEffect(() => {
@@ -138,9 +143,6 @@ export const Map = () => {
     return null;
   }
 
-  formSchema;
-  step2formSchema;
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -150,86 +152,76 @@ export const Map = () => {
       instagram: "",
       website: "",
       phoneNumber: "",
-      companyLogo: "",
+      companyLogo: [] as unknown as File[],
     },
   });
 
   const Step2form = useForm<z.infer<typeof step2formSchema>>({
     resolver: zodResolver(step2formSchema),
     defaultValues: {
-      images: "",
+      images: [] as unknown as File[],
       categories: [],
     },
   });
 
-  const HandleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    const files = Array.from(e.target.files).slice(0, 10);
-    const fileURLs = files.map((file) => URL.createObjectURL(file));
-
-    const updatedPreviews = [...review, ...fileURLs];
-
-    setReview(updatedPreviews);
-  };
-
   const handleProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setProfile(e.target.files[0]);
-      setProfileReview(URL.createObjectURL(e.target.files[0]));
-      console.log(review, "re");
-    } else {
-      setProfileReview("");
-    }
-  };
-  const handleProfile = async ({ profile }) => {
-    const file = profile;
+    const file = e.target.files?.[0];
     if (!file) return;
-
-    try {
-      const [url] = await uploadToCloudinary([file]);
-      form.setValue("companyLogo", url);
-      setProfileReview(url);
-    } catch (error) {
-      console.error("Image upload failed:", error);
-    }
+    setSelectedProfile(file);
+    setProfileReview(URL.createObjectURL(file));
   };
 
-  const HandleImages = async ({ review }) => {
-    if (!review) return;
-
+  const handleProfileToCloud = async (file: File | undefined) => {
+    if (!file) return;
     try {
-      const [url] = await uploadToCloudinary(review);
-      Step2form.setValue("images", url);
+      const url = await uploadImageToCloudinary(file);
+      return url;
     } catch (error) {
-      console.error("Image upload failed:", error);
+      console.log("err", error);
+      return;
     }
   };
 
   const removeImage = (index: number) => {
-    const updatedPreviews = review.filter((_, i) => i !== index);
+    const updatedPreviews = [...imagesReview];
+    const updatedFiles = [...selectedImages];
+    updatedPreviews.splice(index, 1);
+    updatedFiles.splice(index, 1);
 
-    setReview(updatedPreviews);
+    setImagesReview(updatedPreviews);
+    setSelectedImages(updatedFiles);
+    Step2form.setValue("images", updatedFiles as any);
   };
 
-  const handlNextStep = () => {
-    setIsNext(true);
-  };
+  const handlNextStep = () => setIsNext(true);
+  const handPreStep = () => setIsNext(false);
 
-  const handPreStep = () => {
-    setIsNext(false);
-  };
-
-  const onnext = (values: z.infer<typeof formSchema>) => {
-    setValue(values);
+  const onnext = async (values: z.infer<typeof formSchema>) => {
+    const { companyLogo, ...rest } = values;
+    const uploadedLogoUrl = await handleProfileToCloud(selectedProfile);
+    setValue({ ...rest, companyLogo: uploadedLogoUrl });
     handlNextStep();
-    handleProfile(profile);
   };
 
-  const onSubmit = (values: z.infer<typeof step2formSchema>) => {
-    setValue2(values);
+  const onSubmit = async (values: z.infer<typeof step2formSchema>) => {
+    const imageUrls = await uploadToCloudinary(selectedImages);
+
+    const updatedValues = {
+      ...values,
+      images: imageUrls,
+      address: address,
+      location: clicked,
+    };
+
+    const finalData: CompanyInfoType = {
+      ...(value as z.infer<typeof formSchema>),
+      ...updatedValues,
+    };
+
+    setValue(finalData);
+    setCompanyInfo(finalData);
   };
-  console.log({ ...value, ...value2 }, "sa");
+  console.log(companyInfo, "final");
 
   return (
     <div className="w-screen h-screen flex">
@@ -255,20 +247,25 @@ export const Map = () => {
               <div className="flex flex-col size-fit gap-3 items-end ">
                 <h1 className=" text-[14px]">{address}</h1>
                 <Dialog>
-                  <DialogTrigger className="bg-red-400 text-white font-medium rounded-full flex size-fit px-4  py-2">
-                    continue
+                  <DialogTrigger>
+                    <div className="p-[3px] relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+                      <div className="px-8 py-2  bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent">
+                        continue
+                      </div>
+                    </div>
                   </DialogTrigger>
                   <DialogContent
-                    className="flex flex-col size-fit min-w-[466px] "
+                    className="flex flex-col size-fit min-w-[466px] backdrop-blur-lg bg-[#111827]/30 "
                     onInteractOutside={(e) => {
                       e.preventDefault();
                     }}
                   >
-                    <DialogTitle className="text-[24px]">
+                    <DialogTitle className="text-[24px] text-[#e3e8ffe6]">
                       Complete your profile page
                     </DialogTitle>
                     <>
-                      {isNext ? (
+                      {true ? (
                         <div>
                           <Form {...Step2form}>
                             <form
@@ -281,14 +278,14 @@ export const Map = () => {
                                   name="images"
                                   render={({ field }) => (
                                     <FormItem className="flex-col flex items-start w-full pb-[20px]">
-                                      <FormLabel>
-                                        Add detail images 10/{review.length}
+                                      <FormLabel className="text-[#e3e8ffe6]">
+                                        Add detail images 10/
+                                        {imagesReview.length}
                                       </FormLabel>
-
                                       <FormControl>
                                         <div className="flex flex-col items-end justify-end gap-2">
                                           <div className="flex gap-3 size-fit">
-                                            {review.length === 0 ? (
+                                            {imagesReview.length === 0 ? (
                                               <div className="flex justify-center items-center border-2 border-[#E4E4E7] border-dashed w-[500px] h-[250px] text-[14px] rounded-md">
                                                 Add images, limit is 10 🤔
                                               </div>
@@ -296,7 +293,7 @@ export const Map = () => {
                                               <Carousel className="w-[500px] flex justify-center items-center">
                                                 <CarouselPrevious className="absolute z-20" />
                                                 <CarouselContent>
-                                                  {review.map(
+                                                  {imagesReview.map(
                                                     (
                                                       el: string,
                                                       index: number
@@ -326,9 +323,11 @@ export const Map = () => {
                                               </Carousel>
                                             )}
                                           </div>
+
                                           <div
                                             className={`flex items-center justify-end gap-40 w-full ${
-                                              review.length === 10 && "hidden"
+                                              imagesReview.length === 10 &&
+                                              "hidden"
                                             }`}
                                           >
                                             <FormMessage />
@@ -338,13 +337,34 @@ export const Map = () => {
                                               </Button>
                                               <Input
                                                 type="file"
+                                                multiple
                                                 accept="image/*"
-                                                className="opacity-0 w-20 h-full absolute top-0 left-0 z-20 cursor-pointer"
+                                                className="opacity-0 w-20 h-full absolute top-0 left-0 z-20 cursor-pointer text-[#e3e8ffe6]"
                                                 onChange={(e) => {
-                                                  field.onChange(
-                                                    e.target.files
+                                                  const files = Array.from(
+                                                    e.target.files || []
+                                                  ).slice(0, 10);
+
+                                                  const fileURLs = files.map(
+                                                    (file) =>
+                                                      URL.createObjectURL(file)
                                                   );
-                                                  HandleImage(e);
+                                                  setImagesReview((prev) => [
+                                                    ...prev,
+                                                    ...fileURLs,
+                                                  ]);
+                                                  setSelectedImages((prev) => [
+                                                    ...prev,
+                                                    ...files,
+                                                  ]);
+                                                  Step2form.setValue("images", [
+                                                    ...selectedImages,
+                                                    ...files,
+                                                  ]);
+                                                  field.onChange([
+                                                    ...selectedImages,
+                                                    ...files,
+                                                  ]);
                                                 }}
                                               />
                                             </div>
@@ -384,7 +404,9 @@ export const Map = () => {
                               name="companyLogo"
                               render={({ field }) => (
                                 <FormItem className=" flex flex-col items-start w-full pb-[20px]">
-                                  <FormLabel>Company logo</FormLabel>
+                                  <FormLabel className="text-[#e3e8ffe6]">
+                                    Company logo
+                                  </FormLabel>
                                   <FormControl>
                                     <div className="relative flex justify-center items-center size-[160px]">
                                       <div className="flex justify-center items-center border-2 border-[#E4E4E7] border-dashed size-[160px] rounded-full absolute z-20">
@@ -399,7 +421,7 @@ export const Map = () => {
                                         />
                                       </div>
                                       <Camera
-                                        className={`z-10 text-[#18181B]/50 ${
+                                        className={`z-10 text-[#e3e8ffe6]/50 ${
                                           profileReview && "hidden"
                                         }`}
                                       />
@@ -421,7 +443,10 @@ export const Map = () => {
                             <Step1 control={form.control} />
 
                             <div className=" flex pt-5">
-                              <Button className="w-full" type="submit">
+                              <Button
+                                className="inline-flex h-12 animate-shimmer items-center justify-center rounded-md border border-slate-800 bg-[linear-gradient(110deg,#000103,45%,#1e2631,55%,#000103)] bg-[length:200%_100%] px-6 font-medium text-[#e3e8ffe6] transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 w-full"
+                                type="submit"
+                              >
                                 Submit
                               </Button>
                             </div>
@@ -437,7 +462,7 @@ export const Map = () => {
         )}
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url="https://tile.jawg.io/5811666f-ea6e-421b-a1a8-c220b61f6b36/{z}/{x}/{y}{r}.png?access-token=uqeYaHBOlPqp13ESsgteE53obi4o78aMNktTHsvSRtv6g2DhywRCEzEIelnC7vhx"
         />
         {data.map((el, index) => {
           return (
