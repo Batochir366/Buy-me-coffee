@@ -46,6 +46,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Step2 } from "./Step2";
 import { Step1 } from "./Step1";
+import { uploadToCloudinary } from "../utils/imageUpload";
 
 const customIcon = L.icon({
   iconUrl:
@@ -91,6 +92,7 @@ export const Map = () => {
   const [address, setAddress] = useState("");
   const [data] = useState(initialData);
   const [value, setValue] = useState<z.infer<typeof formSchema>>();
+  const [value2, setValue2] = useState<z.infer<typeof step2formSchema>>();
   const [review, setReview] = useState<string[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [profile, setProfile] = useState<string | File>();
@@ -163,19 +165,12 @@ export const Map = () => {
   const HandleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
-    const files = Array.from(e.target.files).slice(
-      0,
-      10 - selectedFiles.length
-    );
+    const files = Array.from(e.target.files).slice(0, 10);
     const fileURLs = files.map((file) => URL.createObjectURL(file));
 
-    const updatedFiles = [...selectedFiles, ...files];
     const updatedPreviews = [...review, ...fileURLs];
 
-    setSelectedFiles(updatedFiles);
     setReview(updatedPreviews);
-
-    Step2form.setValue("images", updatedFiles);
   };
 
   const handleProfileImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -187,30 +182,54 @@ export const Map = () => {
       setProfileReview("");
     }
   };
+  const handleProfile = async ({ profile }) => {
+    const file = profile;
+    if (!file) return;
+
+    try {
+      const [url] = await uploadToCloudinary([file]);
+      form.setValue("companyLogo", url);
+      setProfileReview(url);
+    } catch (error) {
+      console.error("Image upload failed:", error);
+    }
+  };
+
+  const HandleImages = async ({ review }) => {
+    if (!review) return;
+
+    try {
+      const [url] = await uploadToCloudinary(review);
+      Step2form.setValue("images", url);
+    } catch (error) {
+      console.error("Image upload failed:", error);
+    }
+  };
 
   const removeImage = (index: number) => {
-    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
     const updatedPreviews = review.filter((_, i) => i !== index);
 
-    setSelectedFiles(updatedFiles);
     setReview(updatedPreviews);
-
-    Step2form.setValue("images", updatedFiles);
   };
 
   const handlNextStep = () => {
     setIsNext(true);
   };
 
+  const handPreStep = () => {
+    setIsNext(false);
+  };
+
   const onnext = (values: z.infer<typeof formSchema>) => {
     setValue(values);
     handlNextStep();
+    handleProfile(profile);
   };
 
   const onSubmit = (values: z.infer<typeof step2formSchema>) => {
-    setValue(value, values);
+    setValue2(values);
   };
-  console.log(value, "sa");
+  console.log({ ...value, ...value2 }, "sa");
 
   return (
     <div className="w-screen h-screen flex">
@@ -250,107 +269,110 @@ export const Map = () => {
                     </DialogTitle>
                     <>
                       {isNext ? (
-                        <Form {...Step2form}>
-                          <form
-                            onSubmit={Step2form.handleSubmit(onSubmit)}
-                            className="w-full"
-                          >
-                            <div className=" flex flex-col gap-5">
-                              <FormField
-                                control={Step2form.control}
-                                name="images"
-                                render={({ field }) => (
-                                  <FormItem className="flex-col flex items-start w-full">
-                                    <FormLabel>
-                                      Add detail images 10/{review.length}
-                                    </FormLabel>
+                        <div>
+                          <Form {...Step2form}>
+                            <form
+                              onSubmit={Step2form.handleSubmit(onSubmit)}
+                              className="w-full"
+                            >
+                              <div className=" flex flex-col gap-5">
+                                <FormField
+                                  control={Step2form.control}
+                                  name="images"
+                                  render={({ field }) => (
+                                    <FormItem className="flex-col flex items-start w-full pb-[20px]">
+                                      <FormLabel>
+                                        Add detail images 10/{review.length}
+                                      </FormLabel>
 
-                                    <FormControl>
-                                      <div className="flex flex-col items-end justify-end gap-2">
-                                        <div className="flex gap-3 size-fit">
-                                          {review.length === 0 ? (
-                                            <div className="flex justify-center items-center border-2 border-[#E4E4E7] border-dashed w-[500px] h-[250px] text-[14px] rounded-md">
-                                              Add images, limit is 10 🤔
+                                      <FormControl>
+                                        <div className="flex flex-col items-end justify-end gap-2">
+                                          <div className="flex gap-3 size-fit">
+                                            {review.length === 0 ? (
+                                              <div className="flex justify-center items-center border-2 border-[#E4E4E7] border-dashed w-[500px] h-[250px] text-[14px] rounded-md">
+                                                Add images, limit is 10 🤔
+                                              </div>
+                                            ) : (
+                                              <Carousel className="w-[500px] flex justify-center items-center">
+                                                <CarouselPrevious className="absolute z-20" />
+                                                <CarouselContent>
+                                                  {review.map(
+                                                    (
+                                                      el: string,
+                                                      index: number
+                                                    ) => (
+                                                      <CarouselItem
+                                                        key={index}
+                                                        className="w-fit flex flex-col items-end gap-2"
+                                                      >
+                                                        <Image
+                                                          className="w-[500px] h-[250px] rounded-md"
+                                                          src={el}
+                                                          alt={`preview-${index}`}
+                                                          width={430}
+                                                          height={250}
+                                                        />
+                                                        <X
+                                                          onClick={() =>
+                                                            removeImage(index)
+                                                          }
+                                                          className="text-red-500 absolute cursor-pointer"
+                                                        />
+                                                      </CarouselItem>
+                                                    )
+                                                  )}
+                                                </CarouselContent>
+                                                <CarouselNext className="absolute z-20" />
+                                              </Carousel>
+                                            )}
+                                          </div>
+                                          <div
+                                            className={`flex items-center justify-end gap-40 w-full ${
+                                              review.length === 10 && "hidden"
+                                            }`}
+                                          >
+                                            <FormMessage />
+                                            <div className="relative">
+                                              <Button className="flex px-4 py-2 rounded-md z-10">
+                                                Add image
+                                              </Button>
+                                              <Input
+                                                type="file"
+                                                accept="image/*"
+                                                className="opacity-0 w-20 h-full absolute top-0 left-0 z-20 cursor-pointer"
+                                                onChange={(e) => {
+                                                  field.onChange(
+                                                    e.target.files
+                                                  );
+                                                  HandleImage(e);
+                                                }}
+                                              />
                                             </div>
-                                          ) : (
-                                            <Carousel className="w-[500px] flex justify-center items-center">
-                                              <CarouselPrevious className="absolute z-20" />
-                                              <CarouselContent>
-                                                {review.map(
-                                                  (
-                                                    el: string,
-                                                    index: number
-                                                  ) => (
-                                                    <CarouselItem
-                                                      key={index}
-                                                      className="w-fit flex flex-col items-end gap-2"
-                                                    >
-                                                      <Image
-                                                        className="w-[500px] h-[250px] rounded-md"
-                                                        src={el}
-                                                        alt={`preview-${index}`}
-                                                        width={430}
-                                                        height={250}
-                                                      />
-                                                      <X
-                                                        onClick={() =>
-                                                          removeImage(index)
-                                                        }
-                                                        className="text-red-500 absolute cursor-pointer"
-                                                      />
-                                                    </CarouselItem>
-                                                  )
-                                                )}
-                                              </CarouselContent>
-                                              <CarouselNext className="absolute z-20" />
-                                            </Carousel>
-                                          )}
-                                        </div>
-                                        <div
-                                          className={`flex items-center justify-end gap-40 w-full ${
-                                            review.length === 10 && "hidden"
-                                          }`}
-                                        >
-                                          <FormMessage />
-                                          <div className="relative">
-                                            <Button className="flex px-4 py-2 rounded-md z-10">
-                                              Add image
-                                            </Button>
-                                            <Input
-                                              type="file"
-                                              accept="image/*"
-                                              className="opacity-0 w-20 h-full absolute top-0 left-0 z-20 cursor-pointer"
-                                              onChange={(e) => {
-                                                field.onChange(e.target.files);
-                                                HandleImage(e);
-                                              }}
-                                            />
                                           </div>
                                         </div>
-                                      </div>
-                                    </FormControl>
-                                  </FormItem>
-                                )}
+                                      </FormControl>
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+                              <Step2
+                                control={Step2form.control}
+                                name="categories"
                               />
-                            </div>
-                            <Step2
-                              control={Step2form.control}
-                              name="categories"
-                            />
-
-                            <div className=" w-[500px] justify-between flex pt-5">
-                              <Button
-                                onClick={() => setIsNext(false)}
-                                type="button"
-                              >
-                                <ChevronLeft />
-                              </Button>
-                              <Button className=" bg-green-500" type="submit">
-                                Submit
-                              </Button>
-                            </div>
-                          </form>
-                        </Form>
+                            </form>
+                          </Form>
+                          <div className=" w-[500px] justify-between flex pt-5">
+                            <Button onClick={() => handPreStep()} type="button">
+                              <ChevronLeft />
+                            </Button>
+                            <Button
+                              className="bg-green-400"
+                              onClick={() => Step2form.handleSubmit(onSubmit)()}
+                            >
+                              Submit
+                            </Button>
+                          </div>
+                        </div>
                       ) : (
                         <Form {...form}>
                           <form
